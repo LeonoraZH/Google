@@ -25,10 +25,11 @@ function createPicker() {
       .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
       .addView(google.picker.ViewId.DOCS)
       .setOAuthToken(accessToken)
-      .setDeveloperKey("AIzaSyArjLBoYN0w9ExNSFfFBWcKX63WmLVSHAo")
+      //.setDeveloperKey("AIzaSyArjLBoYN0w9ExNSFfFBWcKX63WmLVSHAo")
       .setMaxItems(10)
       .setCallback(pickerCallback)
-      .build();
+      .build()
+      .setVisible(true);
   };
   (tokenClient.callback = async (o) => {
     o.error !== undefined
@@ -46,19 +47,21 @@ function createPicker() {
       : tokenClient.requestAccessToken({ prompt: "" });
 }
 function pickerCallback(e) {
+  console.log(e);
   e.action == google.picker.Action.PICKED &&
     ((cancelled = !1),
     $.each(e[google.picker.Response.DOCUMENTS], function (e, o) {
-      var i = Math.uuid(8).toLowerCase();
+      var i = Math.random();
       (allFilesFinished[i] = !1), (o.randomId = i);
     }),
     $.each(e[google.picker.Response.DOCUMENTS], function (e, o) {
-      checkWhiteList(o.name, filetypes)
-        ? gdriveUpload(e, o)
-        : (postFailedUpload(o.name, 0, "unsupported filetype"),
-          console.log("callback"));
+      // checkWhiteList(o.name, filetypes)
+      //   ? gdriveUpload(e, o)
+      //   : (postFailedUpload(o.name, 0, "unsupported filetype"),
+      console.log("callback");
     }));
 }
+const filetypes = ".pdf";
 function postFailedUpload(e, o, i) {
   (extension = e.split(".").pop()),
     $.ajax({
@@ -70,18 +73,32 @@ function postFailedUpload(e, o, i) {
       dataType: "json",
     });
 }
+var cancelled = !1,
+  allFilesFinished = {},
+  percentage = 0;
 let tokenClient,
   accessToken = null,
   pickerInited = !1,
   gaccInited = !1;
-$(function () {
-  $("#authorize_button").on("click", function (e) {
-    e.preventDefault(), createPicker();
-  });
-});
 
-// if (window.jQuery) {
-//   console.log("works");
-// } else {
-//   console.log("not");
-// }
+$("#authorize_button").on("click", function (e) {
+  e.preventDefault(), createPicker();
+});
+checkWhiteList = function (e, o) {
+  var i = e.toLowerCase();
+  return new RegExp("(" + o.join("|").replace(/\./g, "\\.") + ")$").test(i);
+};
+window.onload = function () {
+  var scriptTag1 = document.createElement("script");
+  scriptTag1.src = "https://apis.google.com/js/api.js?onload=onApiLoad";
+  scriptTag1.setAttribute("type", "text/javascript");
+  scriptTag1.setAttribute("id", "googlepickjs");
+
+  var scriptTag2 = document.createElement("script");
+  scriptTag2.src = "https://accounts.google.com/gsi/client";
+  scriptTag2.setAttribute("type", "text/javascript");
+  scriptTag2.setAttribute("id", "googlepickjs");
+
+  document.body.appendChild(scriptTag1);
+  document.body.appendChild(scriptTag2);
+};
