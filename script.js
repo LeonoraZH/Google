@@ -32,20 +32,14 @@ function createPicker() {
   };
   (tokenClient.callback = async (o) => {
     o.error !== undefined
-      ? swal({
-          title:
-            "There was an error connecting to your Google Drive, please try again.",
-          type: "error",
-          confirmButtonColor: "#4cae4c",
-        })
+      ? console.log(
+          "There was an error connecting to your Google Drive, please try again."
+        )
       : o.scope.includes("https://www.googleapis.com/auth/drive.readonly")
       ? ((accessToken = o.access_token), e())
-      : swal({
-          title:
-            "You must confirm additional permissions to upload to Google Drive, please try again.",
-          type: "error",
-          confirmButtonColor: "#4cae4c",
-        });
+      : console.log(
+          "You must confirm additional permissions to upload to Google Drive, please try again."
+        );
   }),
     null === accessToken
       ? tokenClient.requestAccessToken({ prompt: "consent" })
@@ -80,8 +74,10 @@ let tokenClient,
   accessToken = null,
   pickerInited = !1,
   gaccInited = !1;
-$("#authorize_button").on("click", function (e) {
-  e.preventDefault(), createPicker();
+$(function () {
+  $("#authorize_button").on("click", function (e) {
+    e.preventDefault(), createPicker();
+  });
 });
 
 // if (window.jQuery) {
